@@ -1,0 +1,9 @@
+@import "https://fonts.googleapis.com/css?family=Exo+2&display=swap";
+body {
+  font-family: 'Exo 2', sans-serif;
+  background-color: #f7f7f7;
+}
+
+.full-screen {
+  min-height: 100vh;
+}

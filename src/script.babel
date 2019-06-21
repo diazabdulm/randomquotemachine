@@ -1,0 +1,104 @@
+// TODO: Implement design, remember to mention that you based it off https://dribbble.com/shots/2838580-Quote-Machine
+
+// Redux:
+const GENERATE = 'GENERATE_QUOTE';
+
+const fetchQuote = () => {
+   return (dispatch) => {
+     fetch('https://quota.glitch.me/random')
+     .then((response) => {
+        return response.json()
+     })
+     .then((quoteData) => {
+       dispatch(generateQuote(quoteData))
+     });
+   }
+}
+
+const generateQuote = (quote) => {
+  return {
+    type: GENERATE,
+    quote: quote
+  }
+};
+
+const initialState = {quoteAuthor: 'Julius Caesar', quoteText: 'I came, I saw, I conquered'};
+const quoteReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case GENERATE:
+      return Object.assign({}, state, {
+        quoteAuthor: action.quote.quoteAuthor,
+        quoteText: action.quote.quoteText
+      })
+    default:
+      return state;
+  }
+}
+
+const store = Redux.createStore(quoteReducer, Redux.applyMiddleware(ReduxThunk.default));
+
+// React:
+const { Provider, connect } = ReactRedux;
+
+class RandomQuoteMachine extends React.Component {
+  state = {
+    tweetUrl: ''
+  }
+  componentDidMount() {
+    this.props.displayNewQuote();
+  }
+  componentDidUpdate(prevProps) {
+    if (this.props.quote !== prevProps.quote) {
+      // if it's a new quote, generate a new Twitter URL
+      this.generateTweetUrl(this.props.quote);
+    }
+  }
+  generateQuote = () => {
+    this.props.displayNewQuote();
+  }
+  generateTweetUrl = (quote) => {
+    const baseUrl = 'https://twitter.com/intent/tweet?text=';
+    const tweetUrl = `${baseUrl}${encodeURIComponent(quote.quoteAuthor)}-${encodeURIComponent(quote.quoteText)}`;
+    this.setState({
+      tweetUrl: tweetUrl
+    })
+  }
+  render() {
+    return (
+      <>
+        <h2 id='text' className='font-weight-bold'>{this.props.quote.quoteText}</h2>
+        <h5 id='author'>{this.props.quote.quoteAuthor}</h5>
+        <a id='new-quote' className='btn btn-link' onClick={this.generateQuote}>New Quote</a>
+        <a id='tweet-quote' className='btn btn-link' href={this.state.tweetUrl}>Tweet Quote</a>
+      </>
+    )
+  }
+}
+
+const mapStateToProps = (state) => {
+  return { quote: state }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    displayNewQuote: () => {
+      dispatch(fetchQuote())
+    }
+  }
+}
+
+const Container = connect(mapStateToProps, mapDispatchToProps)(RandomQuoteMachine);
+class AppWrapper extends React.Component {
+  render() {
+    return (
+      <Provider store={store}>
+        <Container />
+      </Provider>
+    );
+  }
+}
+
+ReactDOM.render(<AppWrapper />, document.getElementById('quote-box'));
+
+
+
