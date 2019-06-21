@@ -5,3 +5,4 @@ Tool that generates a random quote onclick
 * Redux store, actions, dispatcher, and how to connect it to React
 * Fetch API
 * Generating shareable tweets from URL
+* Using SASS variables
